@@ -27,15 +27,28 @@ const server = createServer((request, response) => {
         inline_keyboard: [[{ text: "Ещё мем 🔄", callback_data: "next_meme" }]],
       }),
     );
-  } else if (
-    request.method === "GET" &&
-    url.pathname === "/callback" &&
-    data === "next_meme"
-  ) {
-    const randomMeme = randomMemes(objVal);
-    response.statusCode = 200;
-    response.setHeader("Content-Type", "application/json");
-    response.end(JSON.stringify(randomMeme));
+  } else if (request.method === "POST" && url.pathname === "/callback") {
+    let body = "";
+    request.on("data", (chunk) => (body += chunk));
+    request.on("end", () => {
+      try {
+        const bodyObj = JSON.parse(body);
+        if (bodyObj.data === "next_meme") {
+          const randomMeme = randomMemes(objVal);
+          response.statusCode = 200;
+          response.setHeader("Content-Type", "application/json");
+          response.end(JSON.stringify(randomMeme));
+        } else {
+          response.statusCode = 400;
+          response.setHeader("Content-Type", "text/plain");
+          response.end("Invalid data");
+        }
+      } catch (error) {
+        response.statusCode = 400;
+        response.setHeader("Content-Type", "text/plain");
+        response.end("Invalid JSON");
+      }
+    });
   } else if (request.method === "GET" && url.pathname === "/callback") {
     response.statusCode = 400;
     response.setHeader("Content-Type", "text/plain");
