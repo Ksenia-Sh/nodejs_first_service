@@ -6,9 +6,11 @@ function randomMemes(objVal) {
   let i = Math.round(Math.random());
   return objVal[i];
 }
+const myTokenURL = `https://api.telegram.org/bot${process.env.TG_TOKEN}/getMe`;
+const getUpdatesURL = `https://api.telegram.org/bot${process.env.TG_TOKEN}/getUpdates`;
 
 const server = createServer((request, response) => {
-  const myURL = "http://localhost:3000" + request.url;
+  const myURL = `http://localhost:${process.env.PORT}` + request.url;
   const url = new URL(myURL);
   const data = url.searchParams.get("data");
   if (request.method === "GET" && request.url === "/") {
@@ -60,7 +62,14 @@ const server = createServer((request, response) => {
   }
 });
 
-const port = 3000;
-server.listen(port, () => {
-  console.log(`Server is listening on http://localhost:${port}`);
+server.listen(process.env.PORT, () => {
+  console.log(`Server is listening on http://localhost:${process.env.PORT}`);
+  fetch(myTokenURL)
+    .then((response) => response.json())
+    .then((text) => console.log(text));
+  fetch(getUpdatesURL)
+    .then((response) => response.id())
+    .then((id) => {
+      return "Got you";
+    });
 });
