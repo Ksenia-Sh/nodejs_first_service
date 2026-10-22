@@ -64,12 +64,16 @@ const server = createServer((request, response) => {
 
 server.listen(process.env.PORT, () => {
   console.log(`Server is listening on http://localhost:${process.env.PORT}`);
-  fetch(myTokenURL)
-    .then((response) => response.json())
-    .then((text) => console.log(text));
+  // fetch(myTokenURL)
+  //   .then((response) => response.json())
+  //   .then((text) => console.log(text))
   fetch(getUpdatesURL)
-    .then((response) => response.id())
-    .then((id) => {
-      return "Got you";
-    });
+    .then((response) => response.json())
+    .then((data) => fetch(`https://api.telegram.org/bot${process.env.TG_TOKEN}/sendMessage`, {
+      method: "POST", headers: {
+        "Content-Type": "application/json",
+      }, body: JSON.stringify({ chat_id: data.result[0].message.chat.id, text: "BOT answer" })
+    }))
+    .then((response) => response.json())
+    .then((text) => console.log(text))
 });
